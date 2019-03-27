@@ -1,0 +1,48 @@
+language: c
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  - CHECK="normal"
+
+matrix:
+  include:
+    ## distcheck
+    - os: linux
+      compiler: gcc
+      env: CHECK="distcheck"
+
+before_script:
+  - autoreconf -vfi
+  - MAKE="make -j2"
+
+script:
+  - ./configure || { cat config.log; false; }
+  - if [ "$CHECK" = "normal" ]; then
+      $MAKE clean && $MAKE check;
+    fi
+  - if [ "$CHECK" = "distcheck" ]; then
+      $MAKE all && $MAKE distcheck;
+    fi
+
+after_script:
+  # find test log from check as well as from distcheck
+  - log=$(find . -name test-suite.log) && test -f "$log" && cat "$log" || true
+
+## whitelist
+branches:
+  only:
+    - master
+    - next
+    - /^travis.*/
+    - /^tmp.*/
+
+notifications:
+  email:
+    - devel@fresse.org

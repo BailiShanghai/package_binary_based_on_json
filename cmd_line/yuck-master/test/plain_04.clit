@@ -1,0 +1,11 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+$ yuck gendsl "${srcdir}/plain_04.yuck"
+changequote`'changequote([,])dnl
+divert([-1])
+
+changequote`'dnl
+divert`'dnl
+$
+
+## plain_04.clit ends here

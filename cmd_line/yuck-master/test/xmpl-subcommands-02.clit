@@ -1,0 +1,19 @@
+#!/usr/bin/clitoris
+
+$ xmpl-subcommands turbo --help
+Usage: xmpl turbo [OPTION]... [FILE]...
+
+Run xmpl in turbo mode
+
+Common options:
+  -h, --help            display this help and exit
+  -V, --version         output version information and exit
+  -x, --extra           Produce some extra bling.
+  -o, --output=FILE     Output bling to file.
+
+Command-specific options:
+  -x, --extra-turbo     Use more turbos than normal.
+
+$
+
+## xmpl-subcommands-02.clit ends here

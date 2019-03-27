@@ -1,0 +1,28 @@
+{
+    "magic": "RT-Thread",
+    "version": "0.1",
+    "count": 2,
+    "section": [
+        {
+            "firmware": ".\\BK7221U_BL.bin",
+            "version": "1.00",
+            "partition": "bootloader",
+            "start_addr": "0x00000000",
+            "size": "65280"
+        },
+        {
+            "firmware": "..\\rtthread.bin",
+            "version": "1.00",
+            "partition": "app",
+            "start_addr": "0x00011000",
+            "size": "1156K"
+        },
+        {
+            "firmware": "..\\..\\root.bin",
+            "version": "1.00",
+            "partition": "download",
+            "start_addr": "0x000132000",
+            "size": "816K"
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+#!/usr/bin/clitoris  ## -*- shell-script -*-
+
+$ { yuck scmver "${srcdir}/" || true; } > ".test.ver"
+$ if test -s ".test.ver"; then \
+	yuck scmver -n --reference ".test.ver"; \
+  fi
+< .test.ver
+$ rm -f -- .test.ver
+$
+
+## scmver_03.clit ends here
