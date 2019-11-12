@@ -219,7 +219,8 @@ int package_binary_content(void)
     char *all_buf;
     int len, count;
     int ret, i;
-    SECTION_T *sec_ptr;
+    SECTION_T *sec_ptr;	
+    int pre_section_size;
 
     ret = 0;
     /* step0: prepare for data space*/
@@ -233,13 +234,15 @@ int package_binary_content(void)
 
     count = 0;
     /* step1: data organizations*/
+	pre_section_size = 0;
     sec_count = g_json_config.section_count;
     for(i = 0; i < sec_count; i ++)
     {
         sec_ptr = &g_json_config.section[i];
         count += binary_fill(sec_ptr->file_content, sec_ptr->file_size,
-                             &all_buf[count], sec_ptr->size,
+                             &all_buf[count], sec_ptr->size - pre_section_size,
                              PAD_CONTENT);
+		pre_section_size = sec_ptr->size;
     }
 
     /* step2: persistent storage*/
