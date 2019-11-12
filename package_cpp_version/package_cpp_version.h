@@ -1,9 +1,11 @@
 #ifndef _PACKAGE_CPP_VERSION_H_
 #define _PACKAGE_CPP_VERSION_H_
 
+extern void __cdecl dbg_trace(const char *fmt, ...);
+
 #define PACKAGE_DEBUG          1
 #ifdef PACKAGE_DEBUG
-#define PKG_PRINTF             printf
+#define PKG_PRINTF              dbg_trace
 #define PKG_TPRINTF             _tprintf
 #else
 #define PKG_PRINTF(...)

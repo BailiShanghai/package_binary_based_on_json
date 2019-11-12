@@ -30,11 +30,30 @@ char *json_input_file_path = "config.json";
 struct option_t options[] =
 {
     {"f", "-f is the path of configuration json file", NEED_PARAM, NULL, 'f'},
+    {"h", "command help", NO_PARAM, NULL, 'h'},
     {0, 0, NO_PARAM, 0}
 };
 
 extern JSON_CONFIG_T g_json_config;
 extern int pj_release_config_resource(void);
+
+void __cdecl dbg_trace(const char *fmt, ...)
+{
+    char buf[4096], *p = buf;
+    va_list args;
+
+    va_start(args, fmt);
+    p += vsnprintf_s(p, sizeof(buf), _TRUNCATE, fmt, args);
+    va_end(args);
+
+    while (p > buf  &&  isspace(p[-1]))
+        *--p = '\0';
+    *p++ = '\r';
+    *p++ = '\n';
+    *p = '\0';
+
+    OutputDebugStringA(buf);    //OutputDebugString
+}
 
 char *json_file_get_path(char *path)
 {
@@ -310,6 +329,11 @@ void printf_param(int argc, char *argv[])
     while(0);
 }
 
+void printf_usage(void)
+{
+	PKG_PRINTF("merge_tool.exe -f config.json\r\n");
+}
+
 int main_package(int argc, char *argv[])
 {
     int index = 0;
@@ -374,6 +398,10 @@ int main_package(int argc, char *argv[])
             fprintf(stdout, "Option found:\t\t%s\n", argv[index]);
             break;
 
+		case 'h':
+			printf_usage();
+			return 0;
+		
         case 'f' :
             if(input_path_flag && json_input_file_path)
             {
@@ -389,6 +417,7 @@ int main_package(int argc, char *argv[])
 
         default:
             printf ("?? get_option() returned character code 0%o ??\n", c);
+			printf_usage();
             break;
         }
 
