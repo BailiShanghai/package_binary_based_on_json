@@ -10,6 +10,9 @@
 #define PJ_TPRINTF(...)
 #endif
 
+#define USING_FOPEN                 0
+#define CFG_TEMP_FILE               0
+
 #define KEY_MAGIC                    "magic"
 #define KEY_VERSION                  "version"
 #define KEY_SECTION                  "section"

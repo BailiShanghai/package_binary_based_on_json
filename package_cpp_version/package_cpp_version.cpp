@@ -1,5 +1,4 @@
 // package_cpp_version.cpp : 定义控制台应用程序的入口点。
-//
 
 #include "stdafx.h"
 #include "argopt.h"
@@ -8,6 +7,7 @@
 #include "parse_json.h"
 #include "encrypt.h"
 #include <algorithm>
+#include <time.h>
 
 #if PACKAGE_TEST
 int opt_rw = 0;
@@ -36,6 +36,7 @@ struct option_t options[] =
 
 extern JSON_CONFIG_T g_json_config;
 extern int pj_release_config_resource(void);
+extern char *rand_string(int length);
 
 void __cdecl dbg_trace(const char *fmt, ...)
 {
@@ -213,14 +214,58 @@ int binary_fill(char *src, int src_len, char *dest, int dest_count, char padding
     return dest_count;
 }
 
+int debug_tmp_file(char *buf, int buf_len)
+{
+    FILE *f;
+    size_t wr_cnt;
+    int tmp_name_flag = 0;
+    char *tmp_name;
+    char tmp_name_buf[20] = {0};
+    char *tmp_name_head = rand_string(9);
+
+    if(0 == tmp_name_head)
+    {
+        tmp_name = "default_tmp.bin";
+    }
+    else
+    {
+        tmp_name_flag = 1;
+        strcat(tmp_name_buf, tmp_name_head);
+        strcat(tmp_name_buf, ".bin");
+        tmp_name = tmp_name_buf;
+    }
+
+    f = fopen(tmp_name, "wb+");
+    if(NULL == f)
+    {
+        printf("create_tmp_file_failed:%s\r\n", tmp_name);
+        return -2;
+    }
+
+    wr_cnt = fwrite(buf, 1, buf_len, f);
+    if(buf_len != wr_cnt)
+    {
+        printf("tmp_fwrite:%d, %d\r\n", buf_len, wr_cnt);
+    }
+
+    fclose(f);
+
+    if(tmp_name_flag && tmp_name_head)
+    {
+        free(tmp_name_head);
+        tmp_name_head = 0;
+    }
+
+	return 0;
+}
+
 int package_binary_content(void)
 {
     int sec_count;
     char *all_buf;
     int len, count;
     int ret, i;
-    SECTION_T *sec_ptr;	
-    int pre_section_size;
+    SECTION_T *sec_ptr;
 
     ret = 0;
     /* step0: prepare for data space*/
@@ -232,17 +277,34 @@ int package_binary_content(void)
         goto package_over;
     }
 
+    memset(all_buf, 0xff, len);
+
     count = 0;
     /* step1: data organizations*/
-	pre_section_size = 0;
     sec_count = g_json_config.section_count;
     for(i = 0; i < sec_count; i ++)
     {
-        sec_ptr = &g_json_config.section[i];
-        count += binary_fill(sec_ptr->file_content, sec_ptr->file_size,
-                             &all_buf[count], sec_ptr->size - pre_section_size,
+    	int ret;
+		
+		#if CFG_TMP_FILE_AT_FILLING
+		char *tmp_buf = &all_buf[count];
+		int tmp_len;
+		#endif
+		
+        sec_ptr = &g_json_config.section[i];		
+		
+        ret = binary_fill(sec_ptr->file_content, sec_ptr->file_size,
+                             &all_buf[count], sec_ptr->size,
                              PAD_CONTENT);
-		pre_section_size = sec_ptr->size;
+		count += ret;
+		
+		#if CFG_TMP_FILE_AT_FILLING
+		tmp_len = ret;
+		if(tmp_len)
+		{
+			debug_tmp_file(tmp_buf, tmp_len);
+		}
+		#endif		
     }
 
     /* step2: persistent storage*/
@@ -280,20 +342,21 @@ package_over:
 
 int encrypt_binary_result(void)
 {
-	int ret;
-	int argc = ENCRYPT_PARAM_CNT;
-	char *argv[ENCRYPT_PARAM_CNT] = {
-			"encrypt.exe",
-			PACKAGE_FILE_NAME,
-			"0",
-			"0",
-			"0",
-			"0"
-		};
-	char *envp[1] = {0};
-	
-	ret = encrypt_main(argc, argv, envp);
-	
+    int ret;
+    int argc = ENCRYPT_PARAM_CNT;
+    char *argv[ENCRYPT_PARAM_CNT] =
+    {
+        "encrypt.exe",
+        PACKAGE_FILE_NAME,
+        "0",
+        "0",
+        "0",
+        "0"
+    };
+    char *envp[1] = {0};
+
+    ret = encrypt_main(argc, argv, envp);
+
     return ret;
 }
 
@@ -334,7 +397,7 @@ void printf_param(int argc, char *argv[])
 
 void printf_usage(void)
 {
-	PKG_PRINTF("merge_tool.exe -f config.json\r\n");
+    PKG_PRINTF("merge_tool.exe -f config.json\r\n");
 }
 
 int main_package(int argc, char *argv[])
@@ -401,10 +464,10 @@ int main_package(int argc, char *argv[])
             fprintf(stdout, "Option found:\t\t%s\n", argv[index]);
             break;
 
-		case 'h':
-			printf_usage();
-			return 0;
-		
+        case 'h':
+            printf_usage();
+            return 0;
+
         case 'f' :
             if(input_path_flag && json_input_file_path)
             {
@@ -420,7 +483,7 @@ int main_package(int argc, char *argv[])
 
         default:
             printf ("?? get_option() returned character code 0%o ??\n", c);
-			printf_usage();
+            printf_usage();
             break;
         }
 

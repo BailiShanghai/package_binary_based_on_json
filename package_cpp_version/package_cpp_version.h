@@ -12,6 +12,7 @@ extern void __cdecl dbg_trace(const char *fmt, ...);
 #define PKG_TPRINTF(...)
 #endif
 
+#define CFG_TMP_FILE_AT_FILLING            0
 #define PACKAGE_TEST                       0
 
 #define PACKAGE_FILE_NAME                  "package_all.bin"

@@ -5,9 +5,80 @@
 #include <string.h>
 #include "cJSON.h"
 #include <windows.h>
+#include <time.h>
 
 JSON_CONFIG_T g_json_config = {0};
 char *json_content_ptr = NULL;
+
+char *rand_string(int length)
+{
+    char *string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.-#'?!";
+    size_t stringLen = 26 * 2 + 10 + 7;
+    char *randomString;
+
+    randomString = (char *)malloc(sizeof(char) * (length + 1));
+    if (!randomString)
+    {
+        return (char *)0;
+    }
+
+    unsigned int key = 0;
+
+    for (int n = 0; n < length; n++)
+    {
+        key = rand() % stringLen;
+        randomString[n] = string[key];
+    }
+
+    randomString[length] = '\0';
+
+    return randomString;
+}
+
+int tmp_file(char *buf, int buf_len)
+{
+    FILE *f;
+    size_t wr_cnt;
+    int tmp_name_flag = 0;
+    char *tmp_name;
+    char tmp_name_buf[20] = {0};
+    char *tmp_name_head = rand_string(8);
+
+    if(0 == tmp_name_head)
+    {
+        tmp_name = "default_tmp.bin";
+    }
+    else
+    {
+        tmp_name_flag = 1;
+        strcat(tmp_name_buf, tmp_name_head);
+        strcat(tmp_name_buf, ".bin");
+        tmp_name = tmp_name_buf;
+    }
+
+    f = fopen(tmp_name, "wb+");
+    if(NULL == f)
+    {
+        printf("create_tmp_file_failed:%s\r\n", tmp_name);
+        return -3;
+    }
+
+    wr_cnt = fwrite(buf, 1, buf_len, f);
+    if(buf_len != wr_cnt)
+    {
+        printf("tmp_fwrite:%d, %d\r\n", buf_len, wr_cnt);
+    }
+
+    fclose(f);
+
+    if(tmp_name_flag && tmp_name_head)
+    {
+        free(tmp_name_head);
+        tmp_name_head = 0;
+    }
+
+	return 0;
+}
 
 int pj_get_section_end_border(void)
 {
@@ -38,7 +109,6 @@ void pj_destroy_secton(char *sec_ptr)
 
 int pj_create_json_file_content(char *path)
 {
-#define USING_FOPEN   0
 #if (0 == USING_FOPEN)
     errno_t err;
 #endif
@@ -503,6 +573,10 @@ int pj_include_dot_slash_count(char *string, char *dot_slash)
 
 int pj_get_file_info(char *dir_path, char *file_path, char **content)
 {
+    char *buf;
+    errno_t err;
+    int rd_count;
+    FILE *file_hdl;
     int ret;
     int file_count;
     int len, cat_cnt;
@@ -527,6 +601,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
             ret = 1;
             goto get_over;
         }
+		memset(actual_path, 0, len);
 
         cat_cnt = _snprintf(actual_path, len, "%s%s", dir_path, file_path);
         if(cat_cnt < 0)
@@ -629,12 +704,6 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
     file_count = 0;
     do
     {
-        char *buf;
-        size_t len;
-        errno_t err;
-        int rd_count;
-        FILE *file_hdl;
-
         err = fopen_s(&file_hdl, actual_path, "rb");
         if(0 != err)
         {
@@ -652,7 +721,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
 
             break;
         }
-        memset(buf, 0, len + 4);
+        memset(buf, 0xff, len + 4);
 
         fseek(file_hdl, 0, SEEK_SET);
         rd_count = fread(buf, 1, len, file_hdl);
@@ -675,8 +744,11 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
 
         file_count = len;
         *content = buf;
-    }
-    while(0);
+    }while(0);
+	
+#if CFG_TEMP_FILE
+	tmp_file(buf, len);
+#endif
 
 get_over:
     printf("          ret:%d\r\n", ret);
