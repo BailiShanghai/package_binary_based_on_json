@@ -59,14 +59,14 @@ int tmp_file(char *buf, int buf_len)
     f = fopen(tmp_name, "wb+");
     if(NULL == f)
     {
-        printf("create_tmp_file_failed:%s\r\n", tmp_name);
+        dbg_trace("create_tmp_file_failed:%s\r\n", tmp_name);
         return -3;
     }
 
     wr_cnt = fwrite(buf, 1, buf_len, f);
     if(buf_len != wr_cnt)
     {
-        printf("tmp_fwrite:%d, %d\r\n", buf_len, wr_cnt);
+        dbg_trace("tmp_fwrite:%d, %d\r\n", buf_len, wr_cnt);
     }
 
     fclose(f);
@@ -213,15 +213,15 @@ int pj_string_to_value(char *str)
     }
 
     /* convert the string to lowercase*/
-    printf("dup_str:%s\r\n", dup_str);
+    dbg_trace("dup_str:%s\r\n", dup_str);
     err = _strlwr_s(dup_str, strlen(dup_str) + 1);
     if(err)
     {
-        printf("_strlwr_s failed\r\n");
+        dbg_trace("_strlwr_s failed\r\n");
         goto to_exit;
     }
     lower_str = dup_str;
-    printf("lower_str:%s\r\n", lower_str);
+    dbg_trace("lower_str:%s\r\n", lower_str);
 
     /* check the sub-string*/
     str_0x_pos = strstr(lower_str, "0x");
@@ -281,23 +281,23 @@ int pr_print_config(void)
     int count, i;
     SECTION_T *sec_ptr;
 
-    printf("\r\nKEY_MAGIC:%s\r\n", g_json_config.magic_str);
-    printf("KEY_VERSION:%s\r\n", g_json_config.version);
-    printf("KEY_COUNT:%d\r\n", g_json_config.section_count);
-    printf("KEY_SECTION:0x%x\r\n", g_json_config.section);
+    dbg_trace("\r\nKEY_MAGIC:%s\r\n", g_json_config.magic_str);
+    dbg_trace("KEY_VERSION:%s\r\n", g_json_config.version);
+    dbg_trace("KEY_COUNT:%d\r\n", g_json_config.section_count);
+    dbg_trace("KEY_SECTION:0x%x\r\n", g_json_config.section);
 
     count = g_json_config.section_count;
     for(i = 0; i < count; i ++)
     {
         sec_ptr = &g_json_config.section[i];
 
-        printf("KEY_FIRMWARE[%d]:%s\r\n", i, sec_ptr->file_name);
-        printf("KEY_SECTION_VERSION[%d]:%s\r\n", i, sec_ptr->file_version);
-        printf("KEY_PARTITION[%d]:%s\r\n", i, sec_ptr->partition);
-        printf("KEY_START_ADDR[%d]:0x%x\r\n", i, sec_ptr->start_addr);
-        printf("KEY_SIZE[%d]:%d\r\n\r\n", i, sec_ptr->size);
+        dbg_trace("KEY_FIRMWARE[%d]:%s\r\n", i, sec_ptr->file_name);
+        dbg_trace("KEY_SECTION_VERSION[%d]:%s\r\n", i, sec_ptr->file_version);
+        dbg_trace("KEY_PARTITION[%d]:%s\r\n", i, sec_ptr->partition);
+        dbg_trace("KEY_START_ADDR[%d]:0x%x\r\n", i, sec_ptr->start_addr);
+        dbg_trace("KEY_SIZE[%d]:%d\r\n\r\n", i, sec_ptr->size);
     }
-    printf("\r\n");
+    dbg_trace("\r\n");
 
     return 0;
 }
@@ -323,8 +323,8 @@ int pj_print_json(cJSON *root)
         else
         {
             text = cJSON_Print(item);
-            printf("%s:", item->string);
-            printf("%s\n", text);
+            dbg_trace("%s:", item->string);
+            dbg_trace("%s\n", text);
 
             if(text)
             {
@@ -411,7 +411,7 @@ int pj_parse_section_fields_check(cJSON *root)
             ret = 1;
             goto fields_check_exit;
         }
-        printf("firmware:%s\r\n", section_item->valuestring);
+        dbg_trace("firmware:%s\r\n", section_item->valuestring);
 
         section_item = cJSON_GetObjectItem(item, KEY_SECTION_VERSION);
         if(NULL == section_item)
@@ -419,7 +419,7 @@ int pj_parse_section_fields_check(cJSON *root)
             ret = 1;
             goto fields_check_exit;
         }
-        printf("section_version:%s\r\n", section_item->valuestring);
+        dbg_trace("section_version:%s\r\n", section_item->valuestring);
 
         section_item = cJSON_GetObjectItem(item, KEY_PARTITION);
         if(NULL == section_item)
@@ -427,7 +427,7 @@ int pj_parse_section_fields_check(cJSON *root)
             ret = 1;
             goto fields_check_exit;
         }
-        printf("partition_name:%s\r\n", section_item->valuestring);
+        dbg_trace("partition_name:%s\r\n", section_item->valuestring);
 
         section_item = cJSON_GetObjectItem(item, KEY_START_ADDR);
         if(NULL == section_item)
@@ -435,7 +435,7 @@ int pj_parse_section_fields_check(cJSON *root)
             ret = 1;
             goto fields_check_exit;
         }
-        printf("start_address:%s, 0x%08x\r\n", section_item->valuestring, pj_string_to_value(section_item->valuestring));
+        dbg_trace("start_address:%s, 0x%08x\r\n", section_item->valuestring, pj_string_to_value(section_item->valuestring));
 
         section_item = cJSON_GetObjectItem(item, KEY_SIZE);
         if(NULL == section_item)
@@ -443,7 +443,7 @@ int pj_parse_section_fields_check(cJSON *root)
             ret = 1;
             goto fields_check_exit;
         }
-        printf("size:%s, 0x%08x\r\n", section_item->valuestring, pj_string_to_value(section_item->valuestring));
+        dbg_trace("size:%s, 0x%08x\r\n", section_item->valuestring, pj_string_to_value(section_item->valuestring));
     }
 
     (void)i;
@@ -464,7 +464,7 @@ int pj_parse_check(cJSON *root)
         ret = 1;
         goto check_exit;
     }
-    printf("magic:%s\r\n", item->valuestring);
+    dbg_trace("magic:%s\r\n", item->valuestring);
 
     item = cJSON_GetObjectItem(root, KEY_VERSION);
     if(NULL == item)
@@ -472,7 +472,7 @@ int pj_parse_check(cJSON *root)
         ret = 1;
         goto check_exit;
     }
-    printf("version:%s\r\n", item->valuestring);
+    dbg_trace("version:%s\r\n", item->valuestring);
 
     item = cJSON_GetObjectItem(root, KEY_COUNT);
     if(NULL == item)
@@ -487,7 +487,7 @@ int pj_parse_check(cJSON *root)
         ret = 1;
         goto check_exit;
     }
-    printf("count:%d\r\n", item->valueint);
+    dbg_trace("count:%d\r\n", item->valueint);
 
     item = cJSON_GetObjectItem(root, KEY_SECTION);
     if(NULL == item)
@@ -587,8 +587,8 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
     ret = 0;
     file_count = 0;
     *content = NULL;
-    printf("\r\n          dir_path:%s\r\n", dir_path);
-    printf("          file_path:%s\r\n", file_path);
+    dbg_trace("\r\n          dir_path:%s\r\n", dir_path);
+    dbg_trace("          file_path:%s\r\n", file_path);
 
     /* step0: get file path*/
     slash_pos = strchr(file_path, '\\');
@@ -610,7 +610,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
             goto get_over;
         }
 
-        printf("          actual_path:%s\r\n", actual_path);
+        dbg_trace("          actual_path:%s\r\n", actual_path);
     }
     else
     {
@@ -632,10 +632,10 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
         sprintf_s(buf_char_ptr, "%S", buf_tchar_ptr);
         current_path = strdup(buf_char_ptr);
 
-        printf("          current_path:%s\r\n", current_path);
+        dbg_trace("          current_path:%s\r\n", current_path);
         dot_slash_cnt = pj_include_dot_slash_count(file_path, ".\\");
         dot_dot_slash_cnt = pj_include_dot_slash_count(file_path, "..\\");
-        printf("          dot:%d:%d\r\n", dot_slash_cnt, dot_dot_slash_cnt);
+        dbg_trace("          dot:%d:%d\r\n", dot_slash_cnt, dot_dot_slash_cnt);
 
         current_path_len = strlen(current_path);
         if('\\' == current_path[current_path_len - 1])
@@ -653,7 +653,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
 
             slash_ptr[0] = 0;
         }
-        printf("          current_path2:%s\r\n", current_path);
+        dbg_trace("          current_path2:%s\r\n", current_path);
 
         new_file_path = file_path;
         for(i = 0; i < dot_dot_slash_cnt; i ++)
@@ -668,7 +668,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
             dot_dot_slash_pos[1] = 0;
             new_file_path = &dot_dot_slash_pos[2];
         }
-        printf("          new_file_path:%s\r\n", new_file_path);
+        dbg_trace("          new_file_path:%s\r\n", new_file_path);
 
         for(i = 0; i < (dot_slash_cnt - dot_dot_slash_cnt); i ++)
         {
@@ -681,7 +681,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
             slash_ptr[0] = 0;
             new_file_path = &slash_ptr[1];
         }
-        printf("          new_file_path2:%s\r\n", new_file_path);
+        dbg_trace("          new_file_path2:%s\r\n", new_file_path);
 
         actual_path_len = strlen(current_path) + strlen(new_file_path) + 4;
         actual_path = (char *)malloc(actual_path_len);
@@ -697,7 +697,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
             ret = 5;
             goto get_over;
         }
-        printf("          actual_path:%s\r\n", actual_path);
+        dbg_trace("          actual_path:%s\r\n", actual_path);
     }
 
     /* step1: get file size and content*/
@@ -735,11 +735,11 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
 
         if(len != rd_count)
         {
-            printf("fread_warning:%d:%d\\r\n", actual_path, rd_count);
+            dbg_trace("fread_warning:%d:%d\\r\n", actual_path, rd_count);
         }
 
-        printf("          fread:%s\r\n", actual_path);
-        printf("          fread: 0x%x:%d\r\n", file_hdl, rd_count);
+        dbg_trace("          fread:%s\r\n", actual_path);
+        dbg_trace("          fread: 0x%x:%d\r\n", file_hdl, rd_count);
         fclose(file_hdl);
 
         file_count = len;
@@ -751,7 +751,7 @@ int pj_get_file_info(char *dir_path, char *file_path, char **content)
 #endif
 
 get_over:
-    printf("          ret:%d\r\n", ret);
+    dbg_trace("          ret:%d\r\n", ret);
     if(current_path)
     {
         free(current_path);
@@ -776,8 +776,8 @@ int pj_section_get_files_size(char *json_path)
     SECTION_T *sec_ptr;
     char *directory_path = NULL;
 
-    printf("pj_section_get_file_size\r\n");
-    printf("          json_path:%s\r\n", json_path);
+    dbg_trace("pj_section_get_file_size\r\n");
+    dbg_trace("          json_path:%s\r\n", json_path);
     if(NULL == json_path)
     {
         ret = 1;
@@ -792,7 +792,7 @@ int pj_section_get_files_size(char *json_path)
     }
 
     slash_pos = strrchr(tmp_path, '\\');
-    printf("          slash_pos:%s\r\n", slash_pos);
+    dbg_trace("          slash_pos:%s\r\n", slash_pos);
     if(NULL == slash_pos)
     {
         ret = 3;
@@ -800,7 +800,7 @@ int pj_section_get_files_size(char *json_path)
     }
     slash_pos[1] = 0;
     directory_path = tmp_path;
-    printf("          directory_path:%s\r\n", directory_path);
+    dbg_trace("          directory_path:%s\r\n", directory_path);
 
     count = g_json_config.section_count;
     for(i = 0; i < count; i ++)
@@ -808,7 +808,7 @@ int pj_section_get_files_size(char *json_path)
         sec_ptr = &g_json_config.section[i];
         sec_ptr->file_size = pj_get_file_info(directory_path, sec_ptr->file_name,
                                               &sec_ptr->file_content);
-        printf("          section_file:%d 0x%x\r\n", sec_ptr->file_size, sec_ptr->file_content);
+        dbg_trace("          section_file:%d 0x%x\r\n", sec_ptr->file_size, sec_ptr->file_content);
         if(0 == sec_ptr->file_size)
         {
             ret = 4;
@@ -903,7 +903,7 @@ int pj_parse_handler(char *json_path)
     int ret = 0;
     cJSON *root;
 
-    printf("pj_parse_handler: 0x%x\r\n", json_content_ptr);
+    dbg_trace("pj_parse_handler: 0x%x\r\n", json_content_ptr);
     if(NULL == json_content_ptr)
     {
         ret = -4;
@@ -913,7 +913,7 @@ int pj_parse_handler(char *json_path)
     root = cJSON_Parse(json_content_ptr);
     if(NULL == root)
     {
-        printf("parse_failed: [%s]", cJSON_GetErrorPtr());
+        dbg_trace("parse_failed: [%s]", cJSON_GetErrorPtr());
         ret = -5;
         goto parse_over;
     }
@@ -922,13 +922,13 @@ int pj_parse_handler(char *json_path)
     text = cJSON_Print(root);
     if(text)
     {
-        printf("%s\r\n", text);
+        dbg_trace("%s\r\n", text);
         free(text);
     }
-    printf("cjson_print_over:0x%x\r\n\r\n\r\n", root);
+    dbg_trace("cjson_print_over:0x%x\r\n\r\n\r\n", root);
 
     pj_print_json(root);
-    printf("pj_print_over\r\n\r\n");
+    dbg_trace("pj_print_over\r\n\r\n");
 #endif // CONFIG_PRINT_JSON_INFO
 
     ret = pj_parse_check(root);

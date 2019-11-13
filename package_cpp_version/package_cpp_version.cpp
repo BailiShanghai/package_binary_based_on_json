@@ -201,15 +201,15 @@ int binary_fill(char *src, int src_len, char *dest, int dest_count, char padding
 {
     int count;
 
-    printf("src:0x%x:%d dest:0x%x:%d \r\n", src, src_len, dest, dest_count);
-    printf("padding:0x%02x\r\n", padding);
+    dbg_trace("src:0x%x:%d dest:0x%x:%d \r\n", src, src_len, dest, dest_count);
+    dbg_trace("padding:0x%02x\r\n", padding);
 
     memset(dest, padding, dest_count);
 
     count = min(src_len, dest_count);
     memcpy(dest, src, count);
 
-    printf("dest:0x%02x:0x%02x\r\n", dest[0], dest[count - 1]);
+    dbg_trace("dest:0x%02x:0x%02x\r\n", dest[0], dest[count - 1]);
 
     return dest_count;
 }
@@ -238,14 +238,14 @@ int debug_tmp_file(char *buf, int buf_len)
     f = fopen(tmp_name, "wb+");
     if(NULL == f)
     {
-        printf("create_tmp_file_failed:%s\r\n", tmp_name);
+        dbg_trace("create_tmp_file_failed:%s\r\n", tmp_name);
         return -2;
     }
 
     wr_cnt = fwrite(buf, 1, buf_len, f);
     if(buf_len != wr_cnt)
     {
-        printf("tmp_fwrite:%d, %d\r\n", buf_len, wr_cnt);
+        dbg_trace("tmp_fwrite:%d, %d\r\n", buf_len, wr_cnt);
     }
 
     fclose(f);
@@ -316,14 +316,14 @@ int package_binary_content(void)
         f = fopen(PACKAGE_FILE_NAME, "wb+");
         if(NULL == f)
         {
-            printf("create_file_failed:%s\r\n", PACKAGE_FILE_NAME);
+            dbg_trace("create_file_failed:%s\r\n", PACKAGE_FILE_NAME);
             break;
         }
 
         wr_cnt = fwrite(all_buf, 1, len, f);
         if(len != wr_cnt)
         {
-            printf("fwrite:%d, %d\r\n", len, wr_cnt);
+            dbg_trace("fwrite:%d, %d\r\n", len, wr_cnt);
         }
 
         fclose(f);
@@ -482,7 +482,7 @@ int main_package(int argc, char *argv[])
             break;
 
         default:
-            printf ("?? get_option() returned character code 0%o ??\n", c);
+            dbg_trace ("?? get_option() returned character code 0%o ??\n", c);
             printf_usage();
             break;
         }
@@ -499,7 +499,7 @@ opt_done:
     json_file_path = json_file_get_path(json_input_file_path);
     if(!json_file_is_exist(json_file_path))
     {
-        printf("\nconfiguration json file is exceptional!\n");
+        dbg_trace("\nconfiguration json file is exceptional!\n");
     }
 
     package_handler(json_file_path);
@@ -524,12 +524,12 @@ opt_done:
 
     if ((index) && (index < argc))
     {
-        printf ("non-option argv-elements: ");
+        dbg_trace ("non-option argv-elements: ");
 
         while (index < argc)
-            printf("%s ", argv[index++]);
+            dbg_trace("%s ", argv[index++]);
 
-        printf ("\n");
+        dbg_trace ("\n");
 
         exit(EXIT_FAILURE);
     }
@@ -631,7 +631,7 @@ int main_test(int argc, char *argv[])
             break;
 
         default:
-            printf ("?? get_option() returned character code 0%o ??\n", c);
+            dbg_trace ("?? get_option() returned character code 0%o ??\n", c);
             break;
         }
 
@@ -648,12 +648,12 @@ int main_test(int argc, char *argv[])
 opt_done:
     if ((index) && (index < argc))
     {
-        printf ("non-option ARGV-elements: ");
+        dbg_trace ("non-option ARGV-elements: ");
 
         while (index < argc)
-            printf("%s ", argv[index++]);
+            dbg_trace("%s ", argv[index++]);
 
-        printf ("\n");
+        dbg_trace ("\n");
 
         exit(EXIT_FAILURE);
     }

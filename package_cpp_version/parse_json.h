@@ -3,7 +3,7 @@
 
 #define JSON_DEBUG             1
 #ifdef JSON_DEBUG
-#define PJ_PRINTF              printf
+#define PJ_PRINTF              dbg_trace
 #define PJ_TPRINTF             _tprintf
 #else
 #define PJ_PRINTF(...)
@@ -47,6 +47,7 @@ typedef struct _config_t_
 
 extern int pj_deal_with_json_file(char *path);
 extern int pj_get_section_end_border(void);
+extern void __cdecl dbg_trace(const char *fmt, ...);
 #endif // _PARSE_JSON_H_
 // eof
 
